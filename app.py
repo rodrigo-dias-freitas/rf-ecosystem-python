@@ -38,9 +38,19 @@ try:
     val_pce = float(str(raw_pce).replace(",", ".").strip()) if pd.notna(raw_pce) else 0.0
 
     delta_pce = str(df.iloc[9, 19]).strip() if df.shape[0] > 9 and pd.notna(df.iloc[9, 19]) else "SUSTENTADO"
+    status_pce = str(df.iloc[6, 2]).strip() if df.shape[0] > 6 and pd.notna(df.iloc[6, 2]) else "Sem status"
 
     # Tom do FED (linha 11, coluna 1)
     fed_tone = str(df.iloc[11, 1]).strip() if df.shape[0] > 11 and df.shape[1] > 1 and pd.notna(df.iloc[11, 1]) else "NEUTRAL"
+
+    # ISM
+    status_ism = str(df.iloc[7, 2]).strip() if df.shape[0] > 7 and pd.notna(df.iloc[7, 2]) else "Sem status"
+
+    #CES
+    status_ces = str(df.iloc[8, 2]).strip() if df.shape[0] > 8 and pd.notna(df.iloc[8, 2]) else "Sem status"
+
+    #UNEMPLOYMENT RATE
+    status_unemployment = str(df.iloc[9, 2]).strip() if df.shape[0] > 9 and pd.notna(df.iloc[9, 2]) else "Sem status"
 
     st.success("✅ Conectado ao Google Sheets em tempo real!")
 
@@ -117,10 +127,10 @@ st.divider()
 st.subheader("ESTRUTURA DE MOTORES MACRO")
 
 m1, m2, m3, m4 = st.columns(4)
-m1.metric("PCE", "▼ DESCENDO", delta_color="inverse")
-m2.metric("ISM", "▲ SUBINDO", delta_color="normal")
-m3.metric("CES", "• FRACO", delta_color="off")
-m4.metric("UNEMPLOYMENT RATE", "▼ DESCENDO", delta_color="inverse")
+m1.metric("PCE", f"{status_pce}", delta_color="inverse")
+m2.metric("ISM", f"{status_ism}", delta_color="normal")
+m3.metric("CES", f"{status_ces}", delta_color="off")
+m4.metric("UNEMPLOYMENT RATE", f"{status_unemployment}", delta_color="inverse")
 
 st.divider()
 
