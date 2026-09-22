@@ -93,7 +93,12 @@ st.caption("US MACRO DRIVERS & FED PROJECTIONS")
 
 col_fed, col_petr = st.columns([3,1])
 with col_fed:
-    st.info(f"PROVÁVEL TOM DO FED: **{fed_tone}**")
+    if fed_tone.upper() == "HAWKISH":
+        st.error(f"🔴 PROVÁVEL TOM DO FED: {fed_tone}")
+    elif fed_tone.upper() == "DOVISH":
+        st.success(f"🟢 PROVÁVEL TOM DO FED: {fed_tone}")
+    else:
+        st.warning(f"🟡 PROVÁVEL TOM DO FED: {fed_tone}")
 with col_petr:
     st.metric(label="BARRIL DE PETRÓLEO", value="$ 0.00")
 
