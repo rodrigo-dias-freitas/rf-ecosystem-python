@@ -93,8 +93,6 @@ def gauge_macro(titulo, valor, minimo, maximo):
 
     return fig
 
-
-
 # 3. Navegação Lateral (Sidebar)
 with st.sidebar:
     st.title("RF SYSTEM")
