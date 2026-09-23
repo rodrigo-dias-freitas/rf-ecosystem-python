@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
 
 
 
@@ -64,6 +65,35 @@ except Exception as e:
     val_pce = 0.0
     fed_tone = "S/N"
 
+def gauge_macro(titulo, valor, minimo, maximo):
+    fig = go.Figure(
+        go.Indicator(
+            mode = "gauge+number",
+            value = valor,
+            title = {'text': titulo},
+            gauge = {
+                'axis': {'range': [minimo, maximo]},
+                'bar': {'color': "#00E676"},
+                'steps' : [
+                    {'range': [minimo, (minimo + maximo) / 3], 'color': "#D32F2F"},
+                    {'range': [(minimo + maximo) / 3, (minimo + maximo) * 2 / 3], 'color': "#FBC02D"},
+                    {'range': [(minimo + maximo) * 2 / 3, maximo], 'color': "#388E3C"}
+                ]
+            }
+        )
+    )
+
+    fig.update_layout(
+        paper_bgcolor="#0E1117",
+        plot_bgcolor="#0E1117",
+        font={"color": "white"},
+        height=260,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+
+    return fig
+
+
 
 # 3. Navegação Lateral (Sidebar)
 with st.sidebar:
@@ -93,33 +123,27 @@ st.caption("US MACRO DRIVERS & FED PROJECTIONS")
 
 col_fed, col_petr = st.columns([3,1])
 with col_fed:
-    st.info(f"PROVÁVEL TOM DO FED: **{fed_tone}**")
+    if fed_tone.upper() == "HAWKISH":
+        st.error(f"🔴 PROVÁVEL TOM DO FED: {fed_tone}")
+    elif fed_tone.upper() == "DOVISH":
+        st.success(f"🟢 PROVÁVEL TOM DO FED: {fed_tone}")
+    else:
+        st.warning(f"🟡 PROVÁVEL TOM DO FED: {fed_tone}")
 with col_petr:
     st.metric(label="BARRIL DE PETRÓLEO", value="$ 0.00")
 
 # Metrics / KPIs do Dashboard
-c1, c2, c3 = st.columns(3)
 
-c1.metric(
-    label="PDFP DEMAND (EST.)",
-    value=f"{val_pdfp}%",
-    delta=delta_pdfp,
-    help="Compras finais domésticas privadas"
-)
+st.markdown("### 📊 MACRO ENGINE MONITOR")
 
-c2.metric(
-    label="GDP NOW (EST.)",
-    value=f"{val_gdp}%",
-    delta=delta_gdp,
-    help="Mede a taxa geral da economia"
-)
+g1, g2, g3 = st.columns(3)
 
-c3.metric(
-    label="PCE INFLATION (EST.)",
-    value=f"{val_pce}%",
-    delta=delta_pce,
-    help="Métrica principal de inflação do FED"
-)
+with g1:
+    st.plotly_chart(gauge_macro("PDFP DEMAND", val_pdfp, -2, 5), use_container_width=True)
+with g2:
+    st.plotly_chart(gauge_macro("GDP NOW", val_gdp, -2, 6), use_container_width=True)
+with g3:
+    st.plotly_chart(gauge_macro("PCE INFLATION", val_pce, 0, 6), use_container_width=True)
 
 st.divider()
 
