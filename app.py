@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import feedparser
+
 
 
 
@@ -13,6 +15,7 @@ st.set_page_config(
 )
 
 URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQEc5xPNzM70nrMBKE7lr1kJPee-9Zg9TeTrP1dy8B4454VN9NZP596INODDyF0w/pub?gid=397532593&single=true&output=csv"
+INVESTING_RSS_FEED = "https://www.investing.com/rss/news.rss"
 
 # 2. Carregamento dos dados da planilha via Pandas
 @st.cache_data(ttl=60)
@@ -142,6 +145,46 @@ with g2:
     st.plotly_chart(gauge_macro("GDP NOW", val_gdp, -2, 6), use_container_width=True)
 with g3:
     st.plotly_chart(gauge_macro("PCE INFLATION", val_pce, 0, 6), use_container_width=True)
+
+st.divider()
+
+@st.cache_data(ttl=300)
+def buscar_noticias_investing(url, termo_busca):
+    try:
+        feed = feedparser.parse(url)
+        artigos = []
+        termo = termo_busca.lower()
+        for entry in feed.entries:  # Pega as 5 notícias mais recentes
+            titulo = entry.title
+            if termo in titulo.lower():
+                artigos.append({"titulo": titulo, "link": entry.link, "publicado": entry.get("published", "Recente")})
+            if len(artigos) >= 5:
+                break
+        return artigos
+    except Exception as e:
+        print(f"Erro ao carregar notícias: {e}")
+        return []
+# --- SEÇÃO NO STREAMLIT ---
+st.subheader("🎯 Notícias Específicas por Ativo")
+
+# Seletor para escolher qual ativo monitorar
+ativo_escolhido = st.selectbox(
+    "Selecione o Ativo:",
+    ["Meta (META)", "SpaceX (SPCX)"]
+)
+
+# Mapeia a palavra-chave de busca com base na escolha
+termo_pesquisa = "Meta" if "Meta" in ativo_escolhido else "SpaceX"
+
+# Busca as notícias filtradas
+noticias = buscar_noticias_investing(INVESTING_RSS_FEED, termo_pesquisa)
+
+if noticias:
+    st.markdown(f"**Últimas sobre {termo_pesquisa}:**")
+    for item in noticias:
+        st.markdown(f"- [{item['titulo']}]({item['link']})")
+else:
+    st.info(f"Nenhuma notícia recente encontrada no feed para **{termo_pesquisa}** no momento. Tente atualizar em instantes.")
 
 st.divider()
 
